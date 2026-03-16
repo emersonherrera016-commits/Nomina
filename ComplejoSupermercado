@@ -1,0 +1,708 @@
+
+
+import java.util.*;
+
+
+abstract class Persona {
+    protected int    id;
+    protected String nombre;
+    protected String telefono;
+
+    public Persona(int id, String nombre, String telefono) {
+        this.id       = id;
+        this.nombre   = nombre;
+        this.telefono = telefono;
+    }
+
+
+    public abstract String obtenerRol();
+
+
+    public abstract void mostrarInformacion();
+
+
+    public int    getId()       { return id; }
+    public String getNombre()   { return nombre; }
+    public String getTelefono() { return telefono; }
+
+
+    public void setNombre(String nombre)     { this.nombre   = nombre; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+}
+
+
+
+class Producto {
+    private int    id;
+    private String nombre;
+    private String categoria;
+    private double precio;
+    private int    stock;
+
+    public Producto(int id, String nombre, String categoria, double precio, int stock) {
+        this.id        = id;
+        this.nombre    = nombre;
+        this.categoria = categoria;
+        this.precio    = precio;
+        this.stock     = stock;
+    }
+
+
+    public boolean reducirStock(int cantidad) {
+        if (cantidad <= 0) {
+            System.out.println("  [ERROR] La cantidad debe ser mayor a 0.");
+            return false;
+        }
+        if (this.stock < cantidad) {
+            System.out.println("  [ERROR] Stock insuficiente. Stock actual: " + this.stock);
+            return false;
+        }
+        this.stock -= cantidad;
+        return true;
+    }
+
+    public void aumentarStock(int cantidad) {
+        if (cantidad <= 0) {
+            System.out.println("  [ERROR] La cantidad debe ser mayor a 0.");
+            return;
+        }
+        this.stock += cantidad;
+        System.out.println("  [OK] Stock actualizado. Nuevo stock de '"
+                + nombre + "': " + this.stock);
+    }
+
+    public void mostrarInformacion() {
+        System.out.println("  +------------------------------------------+");
+        System.out.println("  | ID        : " + id);
+        System.out.println("  | Nombre    : " + nombre);
+        System.out.println("  | Categoria : " + categoria);
+        System.out.printf ("  | Precio    : $%.2f%n", precio);
+        System.out.println("  | Stock     : " + stock + " unidades");
+        System.out.println("  +------------------------------------------+");
+    }
+
+
+    public int    getId()        { return id; }
+    public String getNombre()    { return nombre; }
+    public String getCategoria() { return categoria; }
+    public double getPrecio()    { return precio; }
+    public int    getStock()     { return stock; }
+
+
+    public void setPrecio(double precio) { this.precio = precio; }
+}
+
+
+
+class Empleado extends Persona {
+    private String cargo;
+    private double salario;
+    private List<String> historialAcciones;
+
+    public Empleado(int id, String nombre, String telefono,
+                    String cargo, double salario) {
+        super(id, nombre, telefono);
+        this.cargo             = cargo;
+        this.salario           = salario;
+        this.historialAcciones = new ArrayList<>();
+    }
+
+    @Override
+    public String obtenerRol() {
+        return "Empleado";
+    }
+
+
+    @Override
+    public void mostrarInformacion() {
+        System.out.println("  +------------------------------------------+");
+        System.out.println("  | ROL       : " + obtenerRol());
+        System.out.println("  | ID        : " + id);
+        System.out.println("  | Nombre    : " + nombre);
+        System.out.println("  | Telefono  : " + telefono);
+        System.out.println("  | Cargo     : " + cargo);
+        System.out.printf ("  | Salario   : $%.2f%n", salario);
+        System.out.println("  | Acciones  : " + historialAcciones.size());
+        System.out.println("  +------------------------------------------+");
+    }
+
+
+    public void registrarVenta(Venta venta) {
+        String accion = "Venta registrada | Ticket #"
+                + venta.getNumeroTicket()
+                + " | Cliente: " + venta.getCliente().getNombre()
+                + " | Total: $" + String.format("%.2f", venta.getTotal());
+        historialAcciones.add(accion);
+        System.out.println("  [EMPLEADO] " + nombre + " registro la venta exitosamente.");
+    }
+
+
+    public void actualizarStock(Producto producto, int cantidad) {
+        producto.aumentarStock(cantidad);
+        String accion = "Stock actualizado | Producto: "
+                + producto.getNombre()
+                + " | Cantidad agregada: " + cantidad;
+        historialAcciones.add(accion);
+        System.out.println("  [EMPLEADO] " + nombre + " actualizo el stock.");
+    }
+
+    public void mostrarHistorial() {
+        if (historialAcciones.isEmpty()) {
+            System.out.println("  Sin acciones registradas.");
+            return;
+        }
+        System.out.println("  --- Historial de " + nombre + " ---");
+        for (int i = 0; i < historialAcciones.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + historialAcciones.get(i));
+        }
+    }
+
+    // Getters
+    public String getCargo()   { return cargo; }
+    public double getSalario() { return salario; }
+}
+
+
+
+class Cliente extends Persona {
+    private String          correo;
+    private List<Venta>     historialCompras;
+
+    public Cliente(int id, String nombre, String telefono, String correo) {
+        super(id, nombre, telefono);
+        this.correo          = correo;
+        this.historialCompras = new ArrayList<>();
+    }
+
+    @Override
+    public String obtenerRol() {
+        return "Cliente";
+    }
+
+
+    @Override
+    public void mostrarInformacion() {
+        System.out.println("  +------------------------------------------+");
+        System.out.println("  | ROL       : " + obtenerRol());
+        System.out.println("  | ID        : " + id);
+        System.out.println("  | Nombre    : " + nombre);
+        System.out.println("  | Telefono  : " + telefono);
+        System.out.println("  | Correo    : " + correo);
+        System.out.printf ("  | Compras   : %d venta(s)%n", historialCompras.size());
+        System.out.println("  +------------------------------------------+");
+    }
+
+
+    public void agregarCompra(Venta venta) {
+        historialCompras.add(venta);
+    }
+
+
+    public void mostrarHistorialCompras() {
+        System.out.println("\n  === Historial de compras de: " + nombre + " ===");
+        if (historialCompras.isEmpty()) {
+            System.out.println("  Sin compras registradas.");
+            return;
+        }
+        double totalGastado = 0;
+        for (Venta v : historialCompras) {
+            v.mostrarResumen();
+            totalGastado += v.getTotal();
+        }
+        System.out.printf("  Total gastado: $%.2f%n", totalGastado);
+    }
+
+    public double calcularTotalGastado() {
+        double total = 0;
+        for (Venta v : historialCompras) total += v.getTotal();
+        return total;
+    }
+
+
+    public String      getCorreo()          { return correo; }
+    public List<Venta> getHistorialCompras() { return historialCompras; }
+}
+
+
+
+class Venta {
+    private static int contadorTickets = 1000;
+
+    private int                          numeroTicket;
+    private Cliente                      cliente;
+    private Empleado                     empleado;
+    private Map<Producto, Integer>       detalles;
+    private Date                         fecha;
+    private double                       total;
+
+    public Venta(Cliente cliente, Empleado empleado) {
+        this.numeroTicket = ++contadorTickets;
+        this.cliente      = cliente;
+        this.empleado     = empleado;
+        this.detalles     = new LinkedHashMap<>();
+        this.fecha        = new Date();
+        this.total        = 0.0;
+    }
+
+
+    public boolean agregarProducto(Producto producto, int cantidad) {
+        if (!producto.reducirStock(cantidad)) {
+            return false;
+        }
+
+        detalles.merge(producto, cantidad, Integer::sum);
+        total += producto.getPrecio() * cantidad;
+        return true;
+    }
+
+
+    public void mostrarTicket() {
+        System.out.println("\n  ============================================");
+        System.out.println("         TICKET DE COMPRA #" + numeroTicket);
+        System.out.println("  ============================================");
+        System.out.println("  Fecha     : " + fecha);
+        System.out.println("  Cliente   : " + cliente.getNombre()
+                + " (ID: " + cliente.getId() + ")");
+        System.out.println("  Atendido  : " + empleado.getNombre()
+                + " [" + empleado.getCargo() + "]");
+        System.out.println("  --------------------------------------------");
+        System.out.printf("  %-20s %6s %10s%n", "Producto", "Cant.", "Subtotal");
+        System.out.println("  --------------------------------------------");
+        for (Map.Entry<Producto, Integer> entry : detalles.entrySet()) {
+            Producto p   = entry.getKey();
+            int      qty = entry.getValue();
+            double   sub = p.getPrecio() * qty;
+            System.out.printf("  %-20s %6d %10.2f%n",
+                    p.getNombre(), qty, sub);
+        }
+        System.out.println("  --------------------------------------------");
+        System.out.printf("  %-20s %6s %10.2f%n", "TOTAL", "", total);
+        System.out.println("  ============================================\n");
+    }
+
+
+    public void mostrarResumen() {
+        System.out.printf("  Ticket #%d | %d producto(s) | Total: $%.2f | %s%n",
+                numeroTicket, detalles.size(), total, fecha);
+    }
+
+    public boolean estaVacia() { return detalles.isEmpty(); }
+
+
+    public int                    getNumeroTicket() { return numeroTicket; }
+    public Cliente                getCliente()      { return cliente; }
+    public Empleado               getEmpleado()     { return empleado; }
+    public Map<Producto, Integer> getDetalles()     { return detalles; }
+    public double                 getTotal()        { return total; }
+}
+
+
+class Supermercado {
+    private String           nombre;
+    private String           direccion;
+    private List<Producto>   inventario;
+    private List<Empleado>   empleados;
+    private List<Cliente>    clientes;
+    private List<Venta>      ventas;
+    private int              contadorId;
+
+    public Supermercado(String nombre, String direccion) {
+        this.nombre     = nombre;
+        this.direccion  = direccion;
+        this.inventario = new ArrayList<>();
+        this.empleados  = new ArrayList<>();
+        this.clientes   = new ArrayList<>();
+        this.ventas     = new ArrayList<>();
+        this.contadorId = 1;
+    }
+
+
+    public void registrarProducto(String nombre, String categoria,
+                                  double precio, int stock) {
+        Producto p = new Producto(contadorId++, nombre, categoria, precio, stock);
+        inventario.add(p);
+        System.out.println("  [OK] Producto '" + nombre + "' registrado con ID " + p.getId());
+    }
+
+
+    public Producto buscarProductoPorId(int id) {
+        for (Producto p : inventario) {
+            if (p.getId() == id) return p;
+        }
+        return null;
+    }
+
+    public Producto buscarProductoPorNombre(String nombre) {
+        for (Producto p : inventario) {
+            if (p.getNombre().equalsIgnoreCase(nombre)) return p;
+        }
+        return null;
+    }
+
+
+    public void mostrarInventario() {
+        System.out.println("\n  === INVENTARIO DEL SUPERMERCADO ===");
+        if (inventario.isEmpty()) {
+            System.out.println("  Sin productos registrados.");
+            return;
+        }
+        System.out.printf("  %-5s %-20s %-14s %8s %7s%n",
+                "ID", "Nombre", "Categoria", "Precio", "Stock");
+        System.out.println("  " + "-".repeat(58));
+        for (Producto p : inventario) {
+            System.out.printf("  %-5d %-20s %-14s %8.2f %7d%n",
+                    p.getId(), p.getNombre(),
+                    p.getCategoria(), p.getPrecio(), p.getStock());
+        }
+    }
+
+
+    public void registrarEmpleado(String nombre, String telefono,
+                                  String cargo, double salario) {
+        Empleado e = new Empleado(contadorId++, nombre, telefono, cargo, salario);
+        empleados.add(e);
+        System.out.println("  [OK] Empleado '" + nombre + "' registrado con ID " + e.getId());
+    }
+
+    public Empleado buscarEmpleadoPorId(int id) {
+        for (Empleado e : empleados) {
+            if (e.getId() == id) return e;
+        }
+        return null;
+    }
+
+    public void mostrarEmpleados() {
+        System.out.println("\n  === EMPLEADOS REGISTRADOS ===");
+        if (empleados.isEmpty()) {
+            System.out.println("  Sin empleados registrados.");
+            return;
+        }
+        for (Empleado e : empleados) e.mostrarInformacion();
+    }
+
+
+    public void registrarCliente(String nombre, String telefono, String correo) {
+        Cliente c = new Cliente(contadorId++, nombre, telefono, correo);
+        clientes.add(c);
+        System.out.println("  [OK] Cliente '" + nombre + "' registrado con ID " + c.getId());
+    }
+
+    public Cliente buscarClientePorId(int id) {
+        for (Cliente c : clientes) {
+            if (c.getId() == id) return c;
+        }
+        return null;
+    }
+
+    public void mostrarClientes() {
+        System.out.println("\n  === CLIENTES REGISTRADOS ===");
+        if (clientes.isEmpty()) {
+            System.out.println("  Sin clientes registrados.");
+            return;
+        }
+        for (Cliente c : clientes) c.mostrarInformacion();
+    }
+
+
+    public void procesarVenta(Venta venta, Empleado empleado) {
+        if (venta.estaVacia()) {
+            System.out.println("  [AVISO] La venta esta vacia. No se registrara.");
+            return;
+        }
+        ventas.add(venta);
+        empleado.registrarVenta(venta);
+        venta.getCliente().agregarCompra(venta);
+        venta.mostrarTicket();
+    }
+
+
+    public void mostrarReporteVentas() {
+        System.out.println("\n  === REPORTE DE VENTAS ===");
+        if (ventas.isEmpty()) {
+            System.out.println("  Sin ventas registradas.");
+            return;
+        }
+        double totalGeneral = 0;
+        for (Venta v : ventas) {
+            v.mostrarResumen();
+            totalGeneral += v.getTotal();
+        }
+        System.out.println("  " + "-".repeat(55));
+        System.out.printf("  Total generado: $%.2f en %d venta(s)%n",
+                totalGeneral, ventas.size());
+    }
+
+
+    public String         getNombre()    { return nombre; }
+    public String         getDireccion() { return direccion; }
+    public List<Producto> getInventario(){ return inventario; }
+    public List<Empleado> getEmpleados() { return empleados; }
+    public List<Cliente>  getClientes()  { return clientes; }
+    public List<Venta>    getVentas()    { return ventas; }
+}
+
+
+
+public class complejoSupermercado {
+
+    private static final Scanner scanner = new Scanner(System.in);
+    private static Supermercado supermercado;
+
+    public static void main(String[] args) {
+        System.out.println("\n  ============================================");
+        System.out.println("    BIENVENIDO AL SISTEMA DE SUPERMERCADO");
+        System.out.println("  ============================================");
+        System.out.print("  Nombre del supermercado : ");
+        String nombre = scanner.nextLine().trim();
+        System.out.print("  Direccion               : ");
+        String direccion = scanner.nextLine().trim();
+
+        supermercado = new Supermercado(nombre, direccion);
+        cargarDatosDemo(); // Datos de ejemplo para empezar
+
+        System.out.println("\n  [OK] '" + nombre + "' inicializado correctamente.");
+
+        boolean salir = false;
+        while (!salir) {
+            mostrarMenuPrincipal();
+            int opcion = leerEntero("  Seleccione una opcion: ");
+            switch (opcion) {
+                case 1  -> menuRegistrarProducto();
+                case 2  -> menuRegistrarEmpleado();
+                case 3  -> menuRegistrarCliente();
+                case 4  -> menuRealizarCompra();
+                case 5  -> menuMostrarInformacion();
+                case 6  -> menuActualizarStock();
+                case 7  -> { salir = true; mensajeDespedida(); }
+                default -> System.out.println("  [!] Opcion invalida. Intente de nuevo.\n");
+            }
+        }
+        scanner.close();
+    }
+
+
+    private static void mostrarMenuPrincipal() {
+        System.out.println("\n  ============================================");
+        System.out.println("           MENU PRINCIPAL");
+        System.out.println("  ============================================");
+        System.out.println("  1. Registrar Producto");
+        System.out.println("  2. Registrar Empleado");
+        System.out.println("  3. Registrar Cliente");
+        System.out.println("  4. Realizar Compra");
+        System.out.println("  5. Mostrar Informacion");
+        System.out.println("  6. Actualizar Stock de Producto");
+        System.out.println("  7. Salir");
+        System.out.println("  ============================================");
+    }
+
+
+    private static void menuRegistrarProducto() {
+        System.out.println("\n  --- REGISTRAR NUEVO PRODUCTO ---");
+        System.out.print("  Nombre del producto : ");
+        String nombre = scanner.nextLine().trim();
+        System.out.print("  Categoria           : ");
+        String categoria = scanner.nextLine().trim();
+        double precio    = leerDouble("  Precio ($)          : ");
+        int    stock     = leerEntero("  Stock inicial       : ");
+        supermercado.registrarProducto(nombre, categoria, precio, stock);
+    }
+
+
+    private static void menuRegistrarEmpleado() {
+        System.out.println("\n  --- REGISTRAR NUEVO EMPLEADO ---");
+        System.out.print("  Nombre    : ");
+        String nombre    = scanner.nextLine().trim();
+        System.out.print("  Telefono  : ");
+        String telefono  = scanner.nextLine().trim();
+        System.out.print("  Cargo     : ");
+        String cargo     = scanner.nextLine().trim();
+        double salario   = leerDouble("  Salario ($): ");
+        supermercado.registrarEmpleado(nombre, telefono, cargo, salario);
+    }
+
+
+    private static void menuRegistrarCliente() {
+        System.out.println("\n  --- REGISTRAR NUEVO CLIENTE ---");
+        System.out.print("  Nombre   : ");
+        String nombre   = scanner.nextLine().trim();
+        System.out.print("  Telefono : ");
+        String telefono = scanner.nextLine().trim();
+        System.out.print("  Correo   : ");
+        String correo   = scanner.nextLine().trim();
+        supermercado.registrarCliente(nombre, telefono, correo);
+    }
+
+
+    private static void menuRealizarCompra() {
+        System.out.println("\n  --- REALIZAR COMPRA ---");
+
+        if (supermercado.getClientes().isEmpty()) {
+            System.out.println("  [!] No hay clientes registrados. Registre uno primero.");
+            return;
+        }
+        if (supermercado.getEmpleados().isEmpty()) {
+            System.out.println("  [!] No hay empleados registrados. Registre uno primero.");
+            return;
+        }
+        if (supermercado.getInventario().isEmpty()) {
+            System.out.println("  [!] No hay productos en inventario.");
+            return;
+        }
+
+
+        supermercado.mostrarClientes();
+        int idCliente = leerEntero("\n  ID del cliente que compra : ");
+        Cliente cliente = supermercado.buscarClientePorId(idCliente);
+        if (cliente == null) {
+            System.out.println("  [ERROR] Cliente no encontrado.");
+            return;
+        }
+
+        supermercado.mostrarEmpleados();
+        int idEmpleado = leerEntero("\n  ID del empleado que atiende: ");
+        Empleado empleado = supermercado.buscarEmpleadoPorId(idEmpleado);
+        if (empleado == null) {
+            System.out.println("  [ERROR] Empleado no encontrado.");
+            return;
+        }
+
+
+        Venta venta = new Venta(cliente, empleado);
+        boolean agregarMas = true;
+
+        while (agregarMas) {
+            supermercado.mostrarInventario();
+            int idProducto = leerEntero("\n  ID del producto a comprar (0 para terminar): ");
+            if (idProducto == 0) break;
+
+            Producto producto = supermercado.buscarProductoPorId(idProducto);
+            if (producto == null) {
+                System.out.println("  [ERROR] Producto no encontrado.");
+            } else {
+                int cantidad = leerEntero("  Cantidad: ");
+                if (venta.agregarProducto(producto, cantidad)) {
+                    System.out.println("  [OK] Producto agregado al carrito.");
+                }
+            }
+
+            System.out.print("\n  Agregar otro producto? (s/n): ");
+            String resp = scanner.nextLine().trim().toLowerCase();
+            agregarMas  = resp.equals("s");
+        }
+
+        supermercado.procesarVenta(venta, empleado);
+    }
+
+
+    private static void menuMostrarInformacion() {
+        System.out.println("\n  --- MOSTRAR INFORMACION ---");
+        System.out.println("  1. Inventario de productos");
+        System.out.println("  2. Lista de empleados");
+        System.out.println("  3. Lista de clientes");
+        System.out.println("  4. Reporte de ventas");
+        System.out.println("  5. Historial de compras de un cliente");
+        System.out.println("  6. Historial de acciones de un empleado");
+        int sub = leerEntero("  Opcion: ");
+
+        switch (sub) {
+            case 1 -> supermercado.mostrarInventario();
+            case 2 -> supermercado.mostrarEmpleados();
+            case 3 -> supermercado.mostrarClientes();
+            case 4 -> supermercado.mostrarReporteVentas();
+            case 5 -> {
+                supermercado.mostrarClientes();
+                int id = leerEntero("  ID del cliente: ");
+                Cliente c = supermercado.buscarClientePorId(id);
+                if (c != null) c.mostrarHistorialCompras();
+                else System.out.println("  [ERROR] Cliente no encontrado.");
+            }
+            case 6 -> {
+                supermercado.mostrarEmpleados();
+                int id = leerEntero("  ID del empleado: ");
+                Empleado e = supermercado.buscarEmpleadoPorId(id);
+                if (e != null) e.mostrarHistorial();
+                else System.out.println("  [ERROR] Empleado no encontrado.");
+            }
+            default -> System.out.println("  [!] Opcion invalida.");
+        }
+    }
+
+    private static void menuActualizarStock() {
+        System.out.println("\n  --- ACTUALIZAR STOCK ---");
+
+        if (supermercado.getEmpleados().isEmpty()) {
+            System.out.println("  [!] No hay empleados registrados.");
+            return;
+        }
+
+        supermercado.mostrarEmpleados();
+        int idEmpleado = leerEntero("\n  ID del empleado responsable: ");
+        Empleado empleado = supermercado.buscarEmpleadoPorId(idEmpleado);
+        if (empleado == null) {
+            System.out.println("  [ERROR] Empleado no encontrado.");
+            return;
+        }
+
+        supermercado.mostrarInventario();
+        int idProducto = leerEntero("\n  ID del producto a actualizar: ");
+        Producto producto = supermercado.buscarProductoPorId(idProducto);
+        if (producto == null) {
+            System.out.println("  [ERROR] Producto no encontrado.");
+            return;
+        }
+
+        int cantidad = leerEntero("  Cantidad a agregar al stock: ");
+        empleado.actualizarStock(producto, cantidad);
+    }
+
+
+    private static void cargarDatosDemo() {
+        supermercado.registrarProducto("Leche Entera",   "Lacteos",    2.50,  50);
+        supermercado.registrarProducto("Pan Integral",   "Panaderia",  1.80,  30);
+        supermercado.registrarProducto("Arroz 1kg",      "Granos",     3.20,  100);
+        supermercado.registrarProducto("Pollo Fresco",   "Carnes",     8.90,  20);
+        supermercado.registrarProducto("Jugo de Naranja","Bebidas",    4.10,  40);
+
+
+        supermercado.registrarEmpleado("Carlos Mendez",  "555-1001", "Cajero",   1500.00);
+        supermercado.registrarEmpleado("Laura Gomez",    "555-1002", "Gerente",  2800.00);
+
+        supermercado.registrarCliente("Ana Torres",     "555-2001", "ana@mail.com");
+        supermercado.registrarCliente("Pedro Ramirez",  "555-2002", "pedro@mail.com");
+
+        System.out.println("\n  [INFO] Datos de demo cargados correctamente.");
+    }
+
+
+    private static int leerEntero(String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+            try {
+                int valor = Integer.parseInt(scanner.nextLine().trim());
+                return valor;
+            } catch (NumberFormatException e) {
+                System.out.println("  [!] Por favor ingrese un numero entero valido.");
+            }
+        }
+    }
+
+    private static double leerDouble(String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+            try {
+                double valor = Double.parseDouble(scanner.nextLine().trim());
+                return valor;
+            } catch (NumberFormatException e) {
+                System.out.println("  [!] Por favor ingrese un numero decimal valido (use punto).");
+            }
+        }
+    }
+
+    private static void mensajeDespedida() {
+        System.out.println("\n  ============================================");
+        System.out.println("    Gracias por usar el Sistema de");
+        System.out.println("    Gestion de Supermercado.");
+        System.out.println("    Hasta pronto!");
+        System.out.println("  ============================================\n");
+    }
+}
